@@ -11,10 +11,10 @@ func TestGetPathSize(t *testing.T) {
 
 	tests := []struct {
 		target   string
-		expected string
+		expected int64
 	}{
-		{"testdata/file49kb", "49.0KB"},
-		{"testdata", "100.0KB"},
+		{"testdata/file49kb", 49 * 1024},
+		{"testdata", 100 * 1024},
 	}
 
 	for _, test := range tests {
