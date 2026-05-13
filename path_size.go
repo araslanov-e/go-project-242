@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
-func GetPathSize(path string, human bool) (string, error) {
+func GetPathSize(path string, human, all bool) (string, error) {
 	if path == "" {
 		return "", errors.New("path is empty")
 	}
@@ -16,30 +17,34 @@ func GetPathSize(path string, human bool) (string, error) {
 		return "", err
 	}
 
-	if info.IsDir() {
-		entries, err := os.ReadDir(path)
+	if !info.IsDir() {
+		return formatSize(info.Size(), human), nil
+	}
+
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return "", err
+	}
+
+	var size int64
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+
+		if strings.HasPrefix(e.Name(), ".") && !all {
+			continue
+		}
+
+		info, err := e.Info()
 		if err != nil {
 			return "", err
 		}
 
-		var size int64
-		for _, e := range entries {
-			if e.IsDir() {
-				continue
-			}
-
-			info, err := e.Info()
-			if err != nil {
-				return "", err
-			}
-
-			size += info.Size()
-		}
-
-		return formatSize(size, human), nil
+		size += info.Size()
 	}
 
-	return formatSize(info.Size(), human), nil
+	return formatSize(size, human), nil
 }
 
 func formatSize(size int64, human bool) string {

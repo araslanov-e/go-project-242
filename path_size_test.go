@@ -13,21 +13,23 @@ func TestGetPathSize(t *testing.T) {
 	tests := []struct {
 		target   string
 		human    bool
+		all      bool
 		expected string
 	}{
-		{"testdata/file49kb", true, "49.0KB"},
-		{"testdata/file49kb", false, fmt.Sprintf("%dB", 49*1024)},
-		{"testdata", true, "100.0KB"},
-		{"testdata", false, fmt.Sprintf("%dB", 100*1024)},
+		{"testdata/file49kb", true, false, "49.0KB"},
+		{"testdata/file49kb", false, false, fmt.Sprintf("%dB", 49*1024)},
+		{"testdata", true, false, "100.0KB"},
+		{"testdata", false, false, fmt.Sprintf("%dB", 100*1024)},
+		{"testdata", false, true, fmt.Sprintf("%dB", 125*1024)},
 	}
 
 	for _, test := range tests {
-		result, err := GetPathSize(test.target, test.human)
+		result, err := GetPathSize(test.target, test.human, test.all)
 		a.Nil(err)
 		a.Equal(test.expected, result)
 	}
 
-	result, err := GetPathSize("", false)
+	result, err := GetPathSize("", false, false)
 	a.EqualError(err, "path is empty")
 	a.Empty(result)
 }
