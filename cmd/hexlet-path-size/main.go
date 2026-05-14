@@ -16,7 +16,7 @@ func main() {
 		Usage: "print size of a file or directory; supports -r (recursive), -H (human-readable), -a (include hidden)",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:    "resursive",
+				Name:    "recursive",
 				Aliases: []string{"r"},
 				Usage:   "recursive size of directories",
 			},
@@ -37,7 +37,7 @@ func main() {
 				path = cmd.Args().Get(0)
 			}
 
-			res, err := code.GetPathSize(path, cmd.Bool("resursive"), cmd.Bool("human"), cmd.Bool("all"))
+			res, err := code.GetPathSize(path, cmd.Bool("recursive"), cmd.Bool("human"), cmd.Bool("all"))
 			if err != nil {
 				return err
 			}

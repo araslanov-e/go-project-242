@@ -12,7 +12,7 @@ func TestGetPathSize(t *testing.T) {
 
 	tests := []struct {
 		target    string
-		resursive bool
+		recursive bool
 		human     bool
 		all       bool
 		expected  string
@@ -27,7 +27,7 @@ func TestGetPathSize(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		result, err := GetPathSize(test.target, test.resursive, test.human, test.all)
+		result, err := GetPathSize(test.target, test.recursive, test.human, test.all)
 		a.Nil(err)
 		a.Equal(test.expected, result)
 	}

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func GetPathSize(path string, resursive, human, all bool) (string, error) {
+func GetPathSize(path string, recursive, human, all bool) (string, error) {
 	if path == "" {
 		return "", errors.New("path is empty")
 	}
@@ -22,7 +22,7 @@ func GetPathSize(path string, resursive, human, all bool) (string, error) {
 		return formatSize(info.Size(), human), nil
 	}
 
-	size, err := getDirSize(path, resursive, all)
+	size, err := getDirSize(path, recursive, all)
 	if err != nil {
 		return "", err
 	}
