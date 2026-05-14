@@ -4,10 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
-func GetPathSize(path string, human, all bool) (string, error) {
+func GetPathSize(path string, resursive, human, all bool) (string, error) {
 	if path == "" {
 		return "", errors.New("path is empty")
 	}
@@ -21,27 +22,9 @@ func GetPathSize(path string, human, all bool) (string, error) {
 		return formatSize(info.Size(), human), nil
 	}
 
-	entries, err := os.ReadDir(path)
+	size, err := getDirSize(path, resursive, all)
 	if err != nil {
 		return "", err
-	}
-
-	var size int64
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-
-		if strings.HasPrefix(e.Name(), ".") && !all {
-			continue
-		}
-
-		info, err := e.Info()
-		if err != nil {
-			return "", err
-		}
-
-		size += info.Size()
 	}
 
 	return formatSize(size, human), nil
@@ -77,4 +60,42 @@ func formatSize(size int64, human bool) string {
 	default:
 		return fmt.Sprintf("%dB", size)
 	}
+}
+
+func getDirSize(path string, recursive, all bool) (int64, error) {
+	var size int64
+
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return size, err
+	}
+
+	for _, e := range entries {
+		if strings.HasPrefix(e.Name(), ".") && !all {
+			continue
+		}
+
+		if e.IsDir() {
+			if !recursive {
+				continue
+			}
+
+			dirPath := filepath.Join(path, e.Name())
+			dirSize, err := getDirSize(dirPath, recursive, all)
+			if err != nil {
+				return size, err
+			}
+
+			size += dirSize
+		} else {
+			info, err := e.Info()
+			if err != nil {
+				return size, err
+			}
+
+			size += info.Size()
+		}
+	}
+
+	return size, nil
 }
