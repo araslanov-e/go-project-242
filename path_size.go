@@ -63,12 +63,12 @@ func formatSize(size int64, human bool) string {
 }
 
 func getDirSize(path string, recursive, all bool) (int64, error) {
-	var size int64
-
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return size, err
+		return 0, err
 	}
+
+	var size int64
 
 	for _, e := range entries {
 		if strings.HasPrefix(e.Name(), ".") && !all {
@@ -83,18 +83,19 @@ func getDirSize(path string, recursive, all bool) (int64, error) {
 			dirPath := filepath.Join(path, e.Name())
 			dirSize, err := getDirSize(dirPath, recursive, all)
 			if err != nil {
-				return size, err
+				return 0, err
 			}
 
 			size += dirSize
-		} else {
-			info, err := e.Info()
-			if err != nil {
-				return size, err
-			}
-
-			size += info.Size()
+			continue
 		}
+
+		info, err := e.Info()
+		if err != nil {
+			return 0, err
+		}
+
+		size += info.Size()
 	}
 
 	return size, nil
