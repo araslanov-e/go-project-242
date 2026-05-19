@@ -1,8 +1,9 @@
 package code
 
 import (
+	errs "code/internal/errors"
 	"code/internal/sizefmt"
-	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -10,7 +11,7 @@ import (
 
 func GetPathSize(path string, recursive, human, all bool) (string, error) {
 	if path == "" {
-		return "", errors.New("path is empty")
+		return "", errs.ErrEmptyPath
 	}
 
 	info, err := os.Lstat(path)

@@ -1,6 +1,7 @@
 package code
 
 import (
+	errs "code/internal/errors"
 	"fmt"
 	"testing"
 
@@ -31,8 +32,12 @@ func TestGetPathSize(t *testing.T) {
 		a.Nil(err)
 		a.Equal(test.expected, result)
 	}
+}
+
+func TestGetPathSize_EmptyPath(t *testing.T) {
+	a := assert.New(t)
 
 	result, err := GetPathSize("", false, false, false)
-	a.EqualError(err, "path is empty")
+	a.ErrorIs(err, errs.ErrEmptyPath)
 	a.Empty(result)
 }
