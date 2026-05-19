@@ -39,7 +39,7 @@ func main() {
 
 			res, err := code.GetPathSize(path, cmd.Bool("recursive"), cmd.Bool("human"), cmd.Bool("all"))
 			if err != nil {
-				return err
+				return fmt.Errorf("get path size %q: %w", path, err)
 			}
 
 			fmt.Printf("%s\t%s\n", res, path)
