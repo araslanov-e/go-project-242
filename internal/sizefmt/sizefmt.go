@@ -12,6 +12,9 @@ const (
 )
 
 func Format(size int64, human bool) string {
+	if size < 0 {
+		return "0B"
+	}
 	if !human {
 		return fmt.Sprintf("%dB", size)
 	}
