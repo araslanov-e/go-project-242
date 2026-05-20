@@ -42,6 +42,10 @@ func main() {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.NArg() > 0 {
+				return fmt.Errorf("too many arguments: expected 0 or 1")
+			}
+
 			path := cmd.StringArg("path")
 			if path == "" {
 				path = "."
