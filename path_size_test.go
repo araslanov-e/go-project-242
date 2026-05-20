@@ -8,30 +8,64 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetPathSize(t *testing.T) {
+func TestGetPathSize_File(t *testing.T) {
 	a := assert.New(t)
 
 	tests := []struct {
+		name      string
 		target    string
 		recursive bool
 		human     bool
 		all       bool
 		expected  string
 	}{
-		{"testdata/file49kb", false, true, false, "49.0KB"},
-		{"testdata/file49kb", false, false, false, fmt.Sprintf("%dB", 49*1024)},
-		{"testdata", false, true, false, "100.0KB"},
-		{"testdata", false, false, false, fmt.Sprintf("%dB", 100*1024)},
-		{"testdata", false, false, true, fmt.Sprintf("%dB", 125*1024)},
-		{"testdata", true, false, false, fmt.Sprintf("%dB", 200*1024)},
-		{"testdata", true, false, true, fmt.Sprintf("%dB", 225*1024)},
+		{name: "unhuman", target: "testdata/file49kb", expected: fmt.Sprintf("%dB", 49*1024)},
+		{name: "human", target: "testdata/file49kb", human: true, expected: "49.0KB"},
+		{name: "hidden file", target: "testdata/.file25kb", expected: fmt.Sprintf("%dB", 25*1024)},
 	}
 
 	for _, test := range tests {
-		result, err := GetPathSize(test.target, test.recursive, test.human, test.all)
-		a.Nil(err)
-		a.Equal(test.expected, result)
+		t.Run(test.name, func(t *testing.T) {
+			result, err := GetPathSize(test.target, test.recursive, test.human, test.all)
+			a.Nil(err)
+			a.Equal(test.expected, result)
+		})
 	}
+}
+
+func TestGetPathSize_Directory(t *testing.T) {
+	a := assert.New(t)
+
+	tests := []struct {
+		name      string
+		target    string
+		recursive bool
+		human     bool
+		all       bool
+		expected  string
+	}{
+		{name: "unhuman", target: "testdata", expected: fmt.Sprintf("%dB", 100*1024)},
+		{name: "human", target: "testdata", human: true, expected: "100.0KB"},
+		{name: "with hidden files", target: "testdata", all: true, expected: fmt.Sprintf("%dB", 125*1024)},
+		{name: "recursive", target: "testdata", recursive: true, expected: fmt.Sprintf("%dB", 200*1024)},
+		{name: "with recursive and hidden files", target: "testdata", recursive: true, all: true, expected: fmt.Sprintf("%dB", 225*1024)},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := GetPathSize(test.target, test.recursive, test.human, test.all)
+			a.Nil(err)
+			a.Equal(test.expected, result)
+		})
+	}
+}
+
+func TestGetPathSize_FileNotExist(t *testing.T) {
+	a := assert.New(t)
+
+	result, err := GetPathSize("testdata/nonexistent", false, false, false)
+	a.Error(err)
+	a.Empty(result)
 }
 
 func TestGetPathSize_EmptyPath(t *testing.T) {
