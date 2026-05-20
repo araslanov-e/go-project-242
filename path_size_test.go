@@ -24,11 +24,11 @@ func TestGetPathSize_File(t *testing.T) {
 		{name: "hidden file", target: "testdata/.file25kb", expected: fmt.Sprintf("%dB", 25*1024)},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			result, err := GetPathSize(test.target, test.recursive, test.human, test.all)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := GetPathSize(tt.target, tt.recursive, tt.human, tt.all)
 			a.Nil(err)
-			a.Equal(test.expected, result)
+			a.Equal(tt.expected, result)
 		})
 	}
 }
@@ -51,11 +51,11 @@ func TestGetPathSize_Directory(t *testing.T) {
 		{name: "with recursive and hidden files", target: "testdata", recursive: true, all: true, expected: fmt.Sprintf("%dB", 225*1024)},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			result, err := GetPathSize(test.target, test.recursive, test.human, test.all)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := GetPathSize(tt.target, tt.recursive, tt.human, tt.all)
 			a.Nil(err)
-			a.Equal(test.expected, result)
+			a.Equal(tt.expected, result)
 		})
 	}
 }

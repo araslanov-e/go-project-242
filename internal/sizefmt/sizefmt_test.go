@@ -21,9 +21,9 @@ func TestFormat_Human(t *testing.T) {
 		{"exabytes", 6 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024, "6.0EB"},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.expected, Format(test.size, true))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, Format(tt.size, true))
 		})
 	}
 }
