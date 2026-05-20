@@ -4,7 +4,6 @@ import (
 	"code"
 	"context"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/urfave/cli/v3"
@@ -43,7 +42,7 @@ func main() {
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			if cmd.NArg() > 0 {
-				return fmt.Errorf("too many arguments: expected 0 or 1")
+				return cli.Exit("too many arguments: expected 0 or 1", 2)
 			}
 
 			path := cmd.StringArg("path")
@@ -53,7 +52,7 @@ func main() {
 
 			res, err := code.GetPathSize(path, cmd.Bool("recursive"), cmd.Bool("human"), cmd.Bool("all"))
 			if err != nil {
-				return fmt.Errorf("get path size %q: %w", path, err)
+				return cli.Exit(fmt.Errorf("get path size %q: %w", path, err), 1)
 			}
 
 			fmt.Printf("%s\t%s\n", res, path)
@@ -62,7 +61,5 @@ func main() {
 		},
 	}
 
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
-	}
+	cmd.Run(context.Background(), os.Args)
 }
