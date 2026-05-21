@@ -15,8 +15,4 @@ jobs:
       - name: Install golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          install-mode: binary
-          args: --version
-
-      - name: Run linter
-        run: make lint
+          version: v2
