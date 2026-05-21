@@ -45,4 +45,4 @@ make build
 
 ## Демонстрация
 
-[![asciicast](https://asciinema.org/a/xM3UO3fuxWFbPElg.svg)](https://asciinema.org/a/xM3UO3fuxWFbPElg)
+![Установка и запуск hexlet-path-size](assets/demo.gif)
