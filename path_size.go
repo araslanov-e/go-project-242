@@ -40,7 +40,7 @@ func getDirSize(path string, recursive, all bool) (int64, error) {
 	var size int64
 
 	for _, e := range entries {
-		if strings.HasPrefix(e.Name(), ".") && !all {
+		if !all && isHiddenEntry(e.Name()) {
 			continue
 		}
 
@@ -68,4 +68,8 @@ func getDirSize(path string, recursive, all bool) (int64, error) {
 	}
 
 	return size, nil
+}
+
+func isHiddenEntry(name string) bool {
+	return strings.HasPrefix(name, ".")
 }
