@@ -30,7 +30,9 @@ func TestFormat_Human(t *testing.T) {
 
 func TestFormat_Unhuman(t *testing.T) {
 	var kilobytes int64 = 49 * 1024
+
 	expected := "50176B"
+
 	t.Run("unhuman", func(t *testing.T) {
 		assert.Equal(t, expected, Format(kilobytes, false))
 	})
@@ -38,6 +40,7 @@ func TestFormat_Unhuman(t *testing.T) {
 
 func TestFormat_Negative(t *testing.T) {
 	expected := "0B"
+
 	t.Run("negative", func(t *testing.T) {
 		assert.Equal(t, expected, Format(-1, false))
 	})

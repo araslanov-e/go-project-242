@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
+
+const testDirPath = "testdata"
 
 func TestCLIFlags(t *testing.T) {
 	binaryPath := buildBinary(t)
@@ -20,33 +23,33 @@ func TestCLIFlags(t *testing.T) {
 	}{
 		{
 			name:     "file size in bytes",
-			args:     []string{"testdata/file49kb"},
-			expected: "50176B\ttestdata/file49kb\n",
+			args:     []string{testDirPath + "/file49kb"},
+			expected: "50176B\t" + testDirPath + "/file49kb" + "\n",
 		},
 		{
 			name:     "file size in human-readable format",
-			args:     []string{"-H", "testdata/file49kb"},
-			expected: "49.0KB\ttestdata/file49kb\n",
+			args:     []string{"-H", testDirPath + "/file49kb"},
+			expected: "49.0KB\t" + testDirPath + "/file49kb" + "\n",
 		},
 		{
 			name:     "directory size",
-			args:     []string{"testdata"},
-			expected: "102400B\ttestdata\n",
+			args:     []string{testDirPath},
+			expected: "102400B\t" + testDirPath + "\n",
 		},
 		{
 			name:     "recursive directory size",
-			args:     []string{"-r", "testdata"},
-			expected: "204800B\ttestdata\n",
+			args:     []string{"-r", testDirPath},
+			expected: "204800B\t" + testDirPath + "\n",
 		},
 		{
 			name:     "directory size with hidden files",
-			args:     []string{"-a", "testdata"},
-			expected: "128000B\ttestdata\n",
+			args:     []string{"-a", testDirPath},
+			expected: "128000B\t" + testDirPath + "\n",
 		},
 		{
 			name:     "recursive directory size with hidden files",
-			args:     []string{"-r", "-a", "testdata"},
-			expected: "230400B\ttestdata\n",
+			args:     []string{"-r", "-a", testDirPath},
+			expected: "230400B\t" + testDirPath + "\n",
 		},
 	}
 
@@ -74,7 +77,7 @@ func TestCLIWithoutPathUsesCurrentDirectory(t *testing.T) {
 func TestCLIWithTooManyArguments(t *testing.T) {
 	binaryPath := buildBinary(t)
 
-	stdout, stderr, err := runBinary(t, binaryPath, "testdata", "extra")
+	stdout, stderr, err := runBinary(t, binaryPath, testDirPath, "extra")
 
 	require.Error(t, err)
 	require.Empty(t, stdout)
@@ -86,7 +89,7 @@ func buildBinary(t *testing.T) string {
 
 	rootDir := projectRoot(t)
 	binaryPath := filepath.Join(t.TempDir(), "hexlet-path-size")
-	cmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/hexlet-path-size")
+	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryPath, "./cmd/hexlet-path-size")
 	cmd.Dir = rootDir
 
 	output, err := cmd.CombinedOutput()
@@ -98,9 +101,12 @@ func buildBinary(t *testing.T) string {
 func runBinary(t *testing.T, binaryPath string, args ...string) (string, string, error) {
 	t.Helper()
 
-	var stdout bytes.Buffer
-	var stderr bytes.Buffer
-	cmd := exec.Command(binaryPath, args...)
+	var (
+		stdout bytes.Buffer
+		stderr bytes.Buffer
+	)
+
+	cmd := exec.CommandContext(context.Background(), binaryPath, args...)
 	cmd.Dir = projectRoot(t)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr

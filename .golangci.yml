@@ -7,3 +7,116 @@ run:
 
 linters:
   default: standard
+
+  enable:
+    # базовая корректность
+    - errcheck        # Проверяет, что ошибки не игнорируются
+    - staticcheck     # Глубокий статический анализ (includes gosimple, stylecheck)
+    - govet           # Встроенный в Go инструмент анализа (ловит потенциальные баги)
+    - ineffassign     # Обнаруживает неиспользуемые присваивания
+    - unused          # Находит неиспользуемые переменные, типы, функции
+    - unparam         # Находит неиспользуемые параметры функций
+
+    # ошибки и wrapping
+    - errorlint       # Рекомендует использовать `errors.Is` / `errors.As` вместо прямых сравнений
+    - errname         # Проверяет имена переменных/типов ошибок (должны содержать "Err")
+    - nilerr          # Находит код, который возвращает nil, даже если он проверяет, что ошибка не равна nil
+    - nilnil          # Проверяет отсутствие одновременного возврата нулевой ошибки и недопустимого значения
+    - nilnesserr
+
+    # стиль и читаемость
+    - revive          # Проверяет стиль кода, оформление, названия
+    - gocritic        # Набор продвинутых правил для улучшения качества кода
+    - goconst         # Находит повторяющиеся строки, которые можно заменить константой
+    - misspell        # Находит часто встречающиеся ошибки в написании английских слов
+    - nlreturn        # Проверяет наличие новой строки перед операторами возврата и ветвления, чтобы повысить ясность кода.
+    - wsl_v5          # Добавляет или удаляет пустые строки
+
+    # сложность
+    - cyclop          # Контролирует цикломатическую сложность функций
+    - gocognit        # Вычисляет и проверяет когнитивную сложность функций
+    - nestif          # Проверяет вложенность if
+    - dupl            # Находит дублированные фрагменты кода
+
+    # ресурсы / context
+    - noctx           # Обнаруживает функцию и метод без использования context.Context.
+    - contextcheck    # Проверяет, что `context.Context` передаётся в методы/функции
+    - containedctx    # Предупреждает, если `context.Context` сохраняется в структуре (плохо)
+    - durationcheck
+
+    # тесты
+    - testifylint     # Проверяет использование github.com/stretchr/testify
+    - thelper
+
+    # современный Go
+    - modernize       # Предлагают упростить код Go, используя современные возможности языка и библиотеки
+    - usestdlibvars   # Обнаруживающий возможность использования переменных/констант из стандартной библиотеки Go.
+    - intrange        # Находит циклы for в которых можно использовать целочисленный диапазон
+
+  disable:
+    - gocyclo  # Старый линтер сложности (заменён на cyclop)
+    - lll      # Проверка длины строк (часто шумная и мешает)
+
+  exclusions:
+    rules: # Локальные исключения по пути/файлу/линерам
+      - path: _test\.go  # Для всех тестов:
+        linters:
+          - cyclop     # Не проверять сложность тестов
+          - dupl       # Не проверять дублирование в тестах
+          - gosec      # Не искать уязвимости в тестах
+      - path: path_size\.go
+        linters:
+          - gocognit   # Не проверять когнитивную сложность подсчёта размера пути
+
+  settings:
+    nlreturn:
+      block-size: 3
+
+    cyclop:
+      max-complexity: 20
+
+    gocognit:
+      min-complexity: 15
+
+    nestif:
+      min-complexity: 4
+
+    dupl:
+      threshold: 100
+
+    revive:
+      rules:
+        - name: blank-imports
+        - name: errorf
+        - name: error-naming
+        - name: error-return
+        - name: exported
+          disabled: true
+
+    gocritic:
+      enabled-checks:
+        - hugeParam
+        - nestingReduce
+        - nilValReturn
+        - truncateCmp
+        - unnecessaryBlock
+        - weakCond
+
+    testifylint:
+      enable-all: true
+
+formatters: # Форматтеры кода (проверка стиля)
+  enable:
+    - gofumpt  # Строгая версия gofmt с дополнительными правилами
+    - goimports
+    - golines
+  settings:
+    gofumpt:
+      extra-rules: true  # Включить дополнительные строгие правила (например, удаление лишних пустых строк)
+
+    golines:
+      max-len: 120
+      tab-len: 4
+      shorten-comments: false
+      reformat-tags: true
+      chain-split-dots: true

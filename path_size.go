@@ -9,9 +9,7 @@ import (
 	"strings"
 )
 
-var (
-	ErrEmptyPath = errors.New("path is empty")
-)
+var ErrEmptyPath = errors.New("path is empty")
 
 func GetPathSize(path string, recursive, human, all bool) (string, error) {
 	if path == "" {
@@ -54,12 +52,14 @@ func getDirSize(path string, recursive, all bool) (int64, error) {
 			}
 
 			dirPath := filepath.Join(path, e.Name())
+
 			dirSize, err := getDirSize(dirPath, recursive, all)
 			if err != nil {
 				return 0, fmt.Errorf("get subdirectory size %q: %w", dirPath, err)
 			}
 
 			size += dirSize
+
 			continue
 		}
 
