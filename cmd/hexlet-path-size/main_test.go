@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -11,9 +12,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testDirPath = "testdata"
-
 func TestCLIFlags(t *testing.T) {
+	dir := createTestDir(t)
+	file := filepath.Join(dir, "file49kb")
 	binaryPath := buildBinary(t)
 
 	tests := []struct {
@@ -23,33 +24,33 @@ func TestCLIFlags(t *testing.T) {
 	}{
 		{
 			name:     "file size in bytes",
-			args:     []string{testDirPath + "/file49kb"},
-			expected: "50176B\t" + testDirPath + "/file49kb" + "\n",
+			args:     []string{file},
+			expected: "50176B\t" + file + "\n",
 		},
 		{
 			name:     "file size in human-readable format",
-			args:     []string{"-H", testDirPath + "/file49kb"},
-			expected: "49.0KB\t" + testDirPath + "/file49kb" + "\n",
+			args:     []string{"-H", file},
+			expected: "49.0KB\t" + file + "\n",
 		},
 		{
 			name:     "directory size",
-			args:     []string{testDirPath},
-			expected: "102400B\t" + testDirPath + "\n",
+			args:     []string{dir},
+			expected: "102400B\t" + dir + "\n",
 		},
 		{
 			name:     "recursive directory size",
-			args:     []string{"-r", testDirPath},
-			expected: "204800B\t" + testDirPath + "\n",
+			args:     []string{"-r", dir},
+			expected: "204800B\t" + dir + "\n",
 		},
 		{
 			name:     "directory size with hidden files",
-			args:     []string{"-a", testDirPath},
-			expected: "128000B\t" + testDirPath + "\n",
+			args:     []string{"-a", dir},
+			expected: "128000B\t" + dir + "\n",
 		},
 		{
 			name:     "recursive directory size with hidden files",
-			args:     []string{"-r", "-a", testDirPath},
-			expected: "230400B\t" + testDirPath + "\n",
+			args:     []string{"-r", "-a", dir},
+			expected: "230400B\t" + dir + "\n",
 		},
 	}
 
@@ -76,12 +77,36 @@ func TestCLIWithoutPathUsesCurrentDirectory(t *testing.T) {
 
 func TestCLIWithTooManyArguments(t *testing.T) {
 	binaryPath := buildBinary(t)
+	dir := t.TempDir()
 
-	stdout, stderr, err := runBinary(t, binaryPath, testDirPath, "extra")
+	stdout, stderr, err := runBinary(t, binaryPath, dir, "extra")
 
 	require.Error(t, err)
 	require.Empty(t, stdout)
 	require.Contains(t, stderr, "too many arguments: expected 0 or 1")
+}
+
+func createTestDir(t *testing.T) string {
+	t.Helper()
+
+	dir := t.TempDir()
+	createFile(t, filepath.Join(dir, "file49kb"), 49*1024)
+	createFile(t, filepath.Join(dir, "file51kb"), 51*1024)
+	createFile(t, filepath.Join(dir, ".file25kb"), 25*1024)
+
+	subdir := filepath.Join(dir, "subdir")
+	require.NoError(t, os.Mkdir(subdir, 0o755))
+
+	createFile(t, filepath.Join(subdir, "file49kb"), 49*1024)
+	createFile(t, filepath.Join(subdir, "file51kb"), 51*1024)
+
+	return dir
+}
+
+func createFile(t *testing.T, path string, size int) {
+	t.Helper()
+
+	require.NoError(t, os.WriteFile(path, make([]byte, size), 0o644))
 }
 
 func buildBinary(t *testing.T) string {

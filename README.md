@@ -30,10 +30,10 @@ make build
 
 ```bash
 ./bin/hexlet-path-size
-./bin/hexlet-path-size testdata/file49kb
-./bin/hexlet-path-size -H testdata/file49kb
-./bin/hexlet-path-size -r -H testdata
-./bin/hexlet-path-size -a -H testdata
+./bin/hexlet-path-size /path/to/file
+./bin/hexlet-path-size -H /path/to/file
+./bin/hexlet-path-size -r -H /path/to/directory
+./bin/hexlet-path-size -a -H /path/to/directory
 ```
 
 ## Флаги
