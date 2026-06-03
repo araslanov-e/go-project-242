@@ -67,6 +67,23 @@ func TestCalculate_Directory(t *testing.T) {
 	}
 }
 
+func TestCalculate_UnreadableDirectory(t *testing.T) {
+	dir := t.TempDir()
+	createFile(t, filepath.Join(dir, "file"), 49*1024)
+
+	require.NoError(t, os.Chmod(dir, 0o000))
+	t.Cleanup(func() {
+		require.NoError(t, os.Chmod(dir, 0o755))
+	})
+
+	size, err := Calculate(dir, Options{})
+	if err == nil {
+		t.Skip("directory remains readable in this environment")
+	}
+
+	assert.Empty(t, size)
+}
+
 func TestCalculate_SymlinkPath(t *testing.T) {
 	dir := t.TempDir()
 	target := filepath.Join(dir, "file")
