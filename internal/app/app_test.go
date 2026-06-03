@@ -1,10 +1,9 @@
-package main
+package app
 
 import (
 	"bytes"
 	"context"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -12,10 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCLIFlags(t *testing.T) {
+func TestRunFlags(t *testing.T) {
 	dir := createTestDir(t)
 	file := filepath.Join(dir, "file49kb")
-	binaryPath := buildBinary(t)
 
 	tests := []struct {
 		name     string
@@ -56,34 +54,40 @@ func TestCLIFlags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			stdout, stderr, err := runBinary(t, binaryPath, tt.args...)
+			output, err := runApp(t, tt.args...)
 
 			require.NoError(t, err)
-			require.Empty(t, stderr)
-			require.Equal(t, tt.expected, stdout)
+			require.Equal(t, tt.expected, output)
 		})
 	}
 }
 
-func TestCLIWithoutPathUsesCurrentDirectory(t *testing.T) {
-	binaryPath := buildBinary(t)
-
-	stdout, stderr, err := runBinary(t, binaryPath)
+func TestRunWithoutPathUsesCurrentDirectory(t *testing.T) {
+	output, err := runApp(t)
 
 	require.NoError(t, err)
-	require.Empty(t, stderr)
-	require.True(t, strings.HasSuffix(stdout, "\t.\n"))
+	require.True(t, strings.HasSuffix(output, "\t.\n"))
 }
 
-func TestCLIWithTooManyArguments(t *testing.T) {
-	binaryPath := buildBinary(t)
+func TestRunWithTooManyArguments(t *testing.T) {
 	dir := t.TempDir()
 
-	stdout, stderr, err := runBinary(t, binaryPath, dir, "extra")
+	output, err := runApp(t, dir, "extra")
 
 	require.Error(t, err)
-	require.Empty(t, stdout)
-	require.Contains(t, stderr, "too many arguments: expected 0 or 1")
+	require.Empty(t, output)
+	require.Contains(t, err.Error(), "too many arguments: expected 0 or 1")
+}
+
+func runApp(t *testing.T, args ...string) (string, error) {
+	t.Helper()
+
+	var output bytes.Buffer
+
+	runArgs := append([]string{"hexlet-path-size"}, args...)
+	err := Run(context.Background(), runArgs, &output)
+
+	return output.String(), err
 }
 
 func createTestDir(t *testing.T) string {
@@ -107,45 +111,4 @@ func createFile(t *testing.T, path string, size int) {
 	t.Helper()
 
 	require.NoError(t, os.WriteFile(path, make([]byte, size), 0o644))
-}
-
-func buildBinary(t *testing.T) string {
-	t.Helper()
-
-	rootDir := projectRoot(t)
-	binaryPath := filepath.Join(t.TempDir(), "hexlet-path-size")
-	cmd := exec.CommandContext(context.Background(), "go", "build", "-o", binaryPath, "./cmd/hexlet-path-size")
-	cmd.Dir = rootDir
-
-	output, err := cmd.CombinedOutput()
-	require.NoError(t, err, string(output))
-
-	return binaryPath
-}
-
-func runBinary(t *testing.T, binaryPath string, args ...string) (string, string, error) {
-	t.Helper()
-
-	var (
-		stdout bytes.Buffer
-		stderr bytes.Buffer
-	)
-
-	cmd := exec.CommandContext(context.Background(), binaryPath, args...)
-	cmd.Dir = projectRoot(t)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-
-	return stdout.String(), stderr.String(), err
-}
-
-func projectRoot(t *testing.T) string {
-	t.Helper()
-
-	rootDir, err := filepath.Abs("../..")
-	require.NoError(t, err)
-
-	return rootDir
 }
