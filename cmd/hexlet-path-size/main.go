@@ -16,7 +16,8 @@ func main() {
 		Description: "This utility prints the size of the specified file or directory. If no file is specified, the size of the current directory is displayed.\n\n" +
 			"By default, the size of the specified directory is calculated without recursion and does not include hidden files and directories.\n" +
 			"The -r flag enables recursive size calculation, while the -a flag includes hidden files and directories in the size calculation.\n" +
-			"The -H flag formats the output in a human-readable format (e.g., 1.5KB, 2MB).",
+			"The -H flag formats the output in a human-readable format (e.g., 1.5KB, 2MB).\n\n" +
+			"Symbolic links are ignored and are not included in the calculated size.",
 		ArgsUsage: "[file or directory]",
 		Arguments: []cli.Argument{
 			&cli.StringArg{

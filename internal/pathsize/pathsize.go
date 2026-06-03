@@ -25,6 +25,10 @@ func Calculate(path string, options Options) (int64, error) {
 		return 0, fmt.Errorf("path info %q: %w", path, err)
 	}
 
+	if isSymlink(info.Mode()) {
+		return 0, nil
+	}
+
 	if !info.IsDir() {
 		return calculateFileSize(info), nil
 	}
@@ -98,7 +102,7 @@ func calculateSubdirSize(dir string, entry os.DirEntry, options Options) (int64,
 }
 
 func shouldSkipEntry(entry os.DirEntry, options Options) bool {
-	return !options.All && isHidden(entry.Name())
+	return isSymlink(entry.Type()) || (!options.All && isHidden(entry.Name()))
 }
 
 func isEmpty(path string) bool {
@@ -107,4 +111,8 @@ func isEmpty(path string) bool {
 
 func isHidden(name string) bool {
 	return strings.HasPrefix(name, ".")
+}
+
+func isSymlink(mode os.FileMode) bool {
+	return mode&os.ModeSymlink != 0
 }

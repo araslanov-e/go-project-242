@@ -67,6 +67,49 @@ func TestCalculate_Directory(t *testing.T) {
 	}
 }
 
+func TestCalculate_SymlinkPath(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, "file")
+	link := filepath.Join(dir, "link")
+
+	createFile(t, target, 49*1024)
+	createSymlink(t, target, link)
+
+	size, err := Calculate(link, Options{})
+
+	require.NoError(t, err)
+	assert.Empty(t, size)
+}
+
+func TestCalculate_DirectoryWithSymlinkFile(t *testing.T) {
+	dir := t.TempDir()
+	target := filepath.Join(dir, "file")
+	link := filepath.Join(dir, "link")
+
+	createFile(t, target, 49*1024)
+	createSymlink(t, target, link)
+
+	size, err := Calculate(dir, Options{})
+
+	require.NoError(t, err)
+	assert.Equal(t, int64(49*1024), size)
+}
+
+func TestCalculate_DirectoryWithSymlinkDirectory(t *testing.T) {
+	dir := t.TempDir()
+	subdir := filepath.Join(dir, "subdir")
+	link := filepath.Join(dir, "link")
+
+	require.NoError(t, os.Mkdir(subdir, 0o755))
+	createFile(t, filepath.Join(subdir, "file51kb"), 51*1024)
+	createSymlink(t, subdir, link)
+
+	size, err := Calculate(dir, Options{Recursive: true})
+
+	require.NoError(t, err)
+	assert.Equal(t, int64(51*1024), size)
+}
+
 func createTestDir(t *testing.T) string {
 	t.Helper()
 
@@ -88,4 +131,12 @@ func createFile(t *testing.T, path string, size int) {
 	t.Helper()
 
 	require.NoError(t, os.WriteFile(path, make([]byte, size), 0o644))
+}
+
+func createSymlink(t *testing.T, oldname, newname string) {
+	t.Helper()
+
+	if err := os.Symlink(oldname, newname); err != nil {
+		t.Skipf("symlink is not supported: %v", err)
+	}
 }
