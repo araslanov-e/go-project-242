@@ -67,10 +67,14 @@ func run(output io.Writer, cmd *cli.Command) error {
 		return cli.Exit(fmt.Sprintf("get path size %q: %v", path, err), 1)
 	}
 
-	_, err = fmt.Fprintf(output, "%s\t%s\n", res, path)
+	_, err = fmt.Fprint(output, formatResult(res, path))
 	if err != nil {
 		return fmt.Errorf("write output: %w", err)
 	}
 
 	return nil
+}
+
+func formatResult(size, path string) string {
+	return fmt.Sprintf("%s\t%s\n", size, path)
 }
