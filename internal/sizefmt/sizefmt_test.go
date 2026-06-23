@@ -13,12 +13,12 @@ func TestFormat_Human(t *testing.T) {
 		expected string
 	}{
 		{"bytes", 512, "512B"},
-		{"kilobytes", 49 * 1024, "49.0KB"},
-		{"megabytes", 2 * 1024 * 1024, "2.0MB"},
-		{"gigabytes", 3 * 1024 * 1024 * 1024, "3.0GB"},
-		{"terabytes", 4 * 1024 * 1024 * 1024 * 1024, "4.0TB"},
-		{"petabytes", 5 * 1024 * 1024 * 1024 * 1024 * 1024, "5.0PB"},
-		{"exabytes", 6 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024, "6.0EB"},
+		{"kilobytes", 49 * KB, "49.0KB"},
+		{"megabytes", 2 * MB, "2.0MB"},
+		{"gigabytes", 3 * GB, "3.0GB"},
+		{"terabytes", 4 * TB, "4.0TB"},
+		{"petabytes", 5 * PB, "5.0PB"},
+		{"exabytes", 6 * EB, "6.0EB"},
 	}
 
 	for _, tt := range tests {
@@ -29,7 +29,7 @@ func TestFormat_Human(t *testing.T) {
 }
 
 func TestFormat_Unhuman(t *testing.T) {
-	var kilobytes int64 = 49 * 1024
+	var kilobytes int64 = 49 * KB
 
 	expected := "50176B"
 
