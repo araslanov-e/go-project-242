@@ -10,6 +10,5 @@ import (
 func main() {
 	if err := app.Run(context.Background(), os.Args, os.Stdout); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(app.ExitCode(err))
 	}
 }
